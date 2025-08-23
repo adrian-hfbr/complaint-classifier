@@ -1,0 +1,25 @@
+# .gitignore
+
+# Python virtual environment and cache
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# ML Artifacts - DO NOT COMMIT
+models/
+mlruns/
+.mlflow/
+
+# Data Files (typically too large for Git)
+data/
+
+# Generated evaluation artifacts
+classification_report.txt
+confusion_matrix.png
+
+# IDE and OS specific files
+.vscode/
+.idea/
+.DS_Store
