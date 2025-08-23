@@ -33,8 +33,7 @@ def classify_complaint(request: ComplaintRequest):
 
         # Takes prediction result and creates CR object
         return ClassificationResponse(
-            predicted_product=prediction,
-            request_id=uuid.uuid4()
+            predicted_product=prediction, request_id=uuid.uuid4()
         )
     except Exception as e:
         print(f"Prediction failed. {e}")

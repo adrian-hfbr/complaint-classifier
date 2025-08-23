@@ -1,5 +1,5 @@
 # src/services.py
-import joblib # to load the .pkl file
+import joblib  # to load the .pkl file
 from pathlib import Path
 from .preprocessing import ComplaintPreprocessor
 
@@ -9,6 +9,7 @@ class ModelService:
     """
     Encapsulates the ML pipeline loading and prediction logic.
     """
+
     def __init__(self, pipeline_path: Path):
         """
         Initializes the service by loading the pipeline from the specified path.
@@ -28,9 +29,11 @@ class ModelService:
             print(f"ERROR: Pipeline artifact not found at {self.pipeline_path}")
             raise
         except Exception as e:
-            print(f"ERROR: An unexpected error occurred while loading the pipeline: {e}")
+            print(
+                f"ERROR: An unexpected error occurred while loading the pipeline: {e}"
+            )
             raise
-    
+
     # public method that the API will call
     def predict(self, narrative: str) -> str:
         """

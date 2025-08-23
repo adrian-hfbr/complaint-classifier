@@ -5,12 +5,14 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import BaseEstimator, TransformerMixin
 from scipy.sparse import spmatrix
 
+
 class ComplaintPreprocessor(BaseEstimator, TransformerMixin):
     """
     Encapsulates all the preprocessing logic for the complaint data.
     This includes cleaning, filtering, and feature extraction.
     """
-    def __init__(self, max_features: int = 5000, stop_words: str = 'english'):
+
+    def __init__(self, max_features: int = 5000, stop_words: str = "english"):
         """
         Initializes the preprocessor with a TF-IDF vectorizer.
         """
@@ -18,12 +20,12 @@ class ComplaintPreprocessor(BaseEstimator, TransformerMixin):
         self.stop_words = stop_words
 
         self.vectorizer = TfidfVectorizer(
-            max_features=max_features, # Keep the top 5,000 most important words
-            stop_words=stop_words, # Ignore common, low-value English words 
-            ngram_range=(1, 2) # Bigrams to capture more context
+            max_features=max_features,  # Keep the top 5,000 most important words
+            stop_words=stop_words,  # Ignore common, low-value English words
+            ngram_range=(1, 2),  # Bigrams to capture more context
         )
-        self.target_column = 'Product'
-        self.feature_column = 'Consumer complaint narrative'
+        self.target_column = "Product"
+        self.feature_column = "Consumer complaint narrative"
 
     def fit(self, df: pd.DataFrame, y: pd.Series = None):
         """
@@ -48,7 +50,7 @@ class ComplaintPreprocessor(BaseEstimator, TransformerMixin):
         # learned/trained vocabulary & importance scores
         X = self.vectorizer.transform(df_clean[self.feature_column])
         return X
-    
+
     def get_target(self, df: pd.DataFrame) -> pd.Series:
         """Returns the cleaned and consolidated target column."""
         df_clean = self._clean_and_filter(df)
@@ -76,7 +78,9 @@ class ComplaintPreprocessor(BaseEstimator, TransformerMixin):
 
         # 3. Apply text cleaning to the narrative
         if self.feature_column in df_copy.columns:
-            df_copy[self.feature_column] = df_copy[self.feature_column].apply(self._clean_text)
+            df_copy[self.feature_column] = df_copy[self.feature_column].apply(
+                self._clean_text
+            )
 
         return df_copy
 
@@ -84,17 +88,19 @@ class ComplaintPreprocessor(BaseEstimator, TransformerMixin):
         """Private helper to consolidate overlapping product categories."""
         # This mapping is derived directly from my EDA
         category_mapping = {
-            'Credit reporting': 'Credit reporting, credit repair services, or other personal consumer reports',
-            'Credit card': 'Credit card or prepaid card',
-            'Prepaid card': 'Credit card or prepaid card',
-            'Bank account or service': 'Checking or savings account',
-            'Money transfers': 'Money transfer, virtual currency, or money service',
-            'Virtual currency': 'Money transfer, virtual currency, or money service',
-            'Payday loan': 'Payday loan, title loan, or personal loan'
+            "Credit reporting": "Credit reporting, credit repair services, or other personal consumer reports",
+            "Credit card": "Credit card or prepaid card",
+            "Prepaid card": "Credit card or prepaid card",
+            "Bank account or service": "Checking or savings account",
+            "Money transfers": "Money transfer, virtual currency, or money service",
+            "Virtual currency": "Money transfer, virtual currency, or money service",
+            "Payday loan": "Payday loan, title loan, or personal loan",
         }
         # Take target_column, perform mapping and ".fillna" ensures that any categories
         # that are not in the category_mapping dictionary are left unchanged
-        df[self.target_column] = df[self.target_column].map(category_mapping).fillna(df[self.target_column])
+        df[self.target_column] = (
+            df[self.target_column].map(category_mapping).fillna(df[self.target_column])
+        )
         return df
 
     def _clean_text(self, text: str) -> str:
@@ -104,6 +110,6 @@ class ComplaintPreprocessor(BaseEstimator, TransformerMixin):
         if not isinstance(text, str):
             return ""
         text = text.lower()
-        text = re.sub(r'[^a-zA-Z0-9\s]', '', text) # Keep alphanumeric and spaces
-        text = re.sub(r'\s+', ' ', text).strip() # Remove extra whitespace
+        text = re.sub(r"[^a-zA-Z0-9\s]", "", text)  # Keep alphanumeric and spaces
+        text = re.sub(r"\s+", " ", text).strip()  # Remove extra whitespace
         return text

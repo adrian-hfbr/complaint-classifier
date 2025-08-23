@@ -6,12 +6,14 @@ import joblib
 
 from src.services import ModelService
 
+
 @pytest.fixture
 def dummy_pipeline_path(tmp_path: Path) -> Path:
     """Creates a dummy pipeline file and returns its path."""
     file_path = tmp_path / "test_pipeline.pkl"
     file_path.touch()
     return file_path
+
 
 def test_model_service_init_success(dummy_pipeline_path: Path, mocker):
     """
@@ -20,7 +22,7 @@ def test_model_service_init_success(dummy_pipeline_path: Path, mocker):
     # Arrange
     mock_pipeline = MagicMock()
     # Use mocker.patch to replace joblib.load ONLY for this test
-    mocker.patch('joblib.load', return_value=mock_pipeline)
+    mocker.patch("joblib.load", return_value=mock_pipeline)
 
     # Act
     service = ModelService(pipeline_path=dummy_pipeline_path)
@@ -28,6 +30,7 @@ def test_model_service_init_success(dummy_pipeline_path: Path, mocker):
     # Assert
     assert service.pipeline is not None
     joblib.load.assert_called_once_with(dummy_pipeline_path)
+
 
 def test_model_service_init_file_not_found():
     """
@@ -41,15 +44,16 @@ def test_model_service_init_file_not_found():
     with pytest.raises(FileNotFoundError):
         ModelService(pipeline_path=non_existent_path)
 
+
 def test_model_service_predict(dummy_pipeline_path: Path, mocker):
     """
     Tests the predict method to ensure it formats the input and output correctly.
     """
     # Arrange
     mock_pipeline = MagicMock()
-    mock_pipeline.predict.return_value = ['Credit card or prepaid card']
-    mocker.patch('joblib.load', return_value=mock_pipeline)
-    
+    mock_pipeline.predict.return_value = ["Credit card or prepaid card"]
+    mocker.patch("joblib.load", return_value=mock_pipeline)
+
     service = ModelService(pipeline_path=dummy_pipeline_path)
     test_narrative = "This is a test complaint about my credit card."
 
@@ -58,4 +62,4 @@ def test_model_service_predict(dummy_pipeline_path: Path, mocker):
 
     # Assert
     mock_pipeline.predict.assert_called_once_with([test_narrative])
-    assert prediction == 'Credit card or prepaid card'
+    assert prediction == "Credit card or prepaid card"

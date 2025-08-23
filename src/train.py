@@ -1,8 +1,8 @@
 # src/train.py
-import argparse # Allows the script to accept command-line arguments
+import argparse  # Allows the script to accept command-line arguments
 import pandas as pd
-import joblib # Used to save trained ML model & preprocessor
-import mlflow # Used to log things like model parameters, performance metrics, and the model itself
+import joblib  # Used to save trained ML model & preprocessor
+import mlflow  # Used to log things like model parameters, performance metrics, and the model itself
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
@@ -22,12 +22,12 @@ def run_training(data_path: str, model_output_path: str):
         # --- 1. Load and Preprocess Data ---
         df = pd.read_csv(
             data_path,
-            nrows=30000, # Use a subsample for rapid development
-            low_memory=False # Silences the DtypeWarning
-        ) # Load raw data
-        preprocessor = ComplaintPreprocessor() # Initialize preprocess-object
-        preprocessor.fit(df) # fit preprocess-object on data
-        X = preprocessor.transform(df) # create transformed matrix X & y
+            nrows=30000,  # Use a subsample for rapid development
+            low_memory=False,  # Silences the DtypeWarning
+        )  # Load raw data
+        preprocessor = ComplaintPreprocessor()  # Initialize preprocess-object
+        preprocessor.fit(df)  # fit preprocess-object on data
+        X = preprocessor.transform(df)  # create transformed matrix X & y
         y = preprocessor.get_target(df)
 
         # --- 2. Split Data ---
@@ -44,7 +44,7 @@ def run_training(data_path: str, model_output_path: str):
         # --- 4. Evaluate Model ---
         predictions = model.predict(X_test)
         accuracy = accuracy_score(y_test, predictions)
-        f1_macro = f1_score(y_test, predictions, average='macro')
+        f1_macro = f1_score(y_test, predictions, average="macro")
 
         # --- 5. Log to MLflow ---
         # Log the current git commit hash for full reproducibility
@@ -68,22 +68,27 @@ def run_training(data_path: str, model_output_path: str):
         mlflow.log_artifact(f"{model_output_path}/preprocessor.pkl")
         mlflow.log_artifact(f"{model_output_path}/model.pkl")
 
-        print(f"Training complete. Accuracy: {accuracy:.4f}, F1 (Macro): {f1_macro:.4f}")
+        print(
+            f"Training complete. Accuracy: {accuracy:.4f}, F1 (Macro): {f1_macro:.4f}"
+        )
+
 
 if __name__ == "__main__":
     # --- 7. Command-Line Interface ---
-    parser = argparse.ArgumentParser(description="Train a complaint classification model.")
+    parser = argparse.ArgumentParser(
+        description="Train a complaint classification model."
+    )
     parser.add_argument(
         "--data-path",
         type=str,
         required=True,
-        help="Path to the gzipped CSV data file."
+        help="Path to the gzipped CSV data file.",
     )
     parser.add_argument(
         "--model-output-path",
         type=str,
         required=True,
-        help="Directory to save the trained model and preprocessor artifacts."
+        help="Directory to save the trained model and preprocessor artifacts.",
     )
     args = parser.parse_args()
 
