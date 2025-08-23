@@ -54,7 +54,7 @@ def run_evaluation(data_path: str, pipeline_path: str):
         
         # Classification Report (logged as a text file)
         report = classification_report(y_test, predictions, target_names=class_labels,
-                                       zero_division=0)
+                                       labels=class_labels, zero_division=0)
         with open("classification_report.txt", "w") as f:
             f.write(report)
         mlflow.log_artifact("classification_report.txt")

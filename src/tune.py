@@ -23,7 +23,7 @@ def run_tuning(data_path: str, model_output_path: str):
         # --- 1. Load Data & Split ---
         df_raw = pd.read_csv(
             data_path,
-            nrows=150000, # Use a subsample for faster development
+            nrows=50000, # Use a subsample for faster development
             low_memory=False # Silences the DtypeWarning
         )
         preprocessor = ComplaintPreprocessor()
