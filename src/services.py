@@ -1,8 +1,10 @@
 # src/services.py
-import joblib
+import joblib # to load the .pkl file
 from pathlib import Path
 from .preprocessing import ComplaintPreprocessor
 
+
+# Container class for inference logic
 class ModelService:
     """
     Encapsulates the ML pipeline loading and prediction logic.
@@ -28,7 +30,8 @@ class ModelService:
         except Exception as e:
             print(f"ERROR: An unexpected error occurred while loading the pipeline: {e}")
             raise
-
+    
+    # public method that the API will call
     def predict(self, narrative: str) -> str:
         """
         Makes a prediction on a single, raw complaint narrative.
@@ -39,11 +42,8 @@ class ModelService:
         Returns:
             str: The predicted product category as a string.
         """
-        # The scikit-learn pipeline's .predict() method expects an iterable
-        # (like a list or Series), not a single string. We wrap the narrative
-        # in a list to create the correct input format.
+        # Get the input text 'narrative", execute pipeline with predict()
         prediction_array = self.pipeline.predict([narrative])
-        
-        # The prediction comes back as an array with a single element.
-        # We extract that single prediction to return a clean string.
+
+        # Only passed one narrative, thus only have single prediction in return array
         return prediction_array[0]
