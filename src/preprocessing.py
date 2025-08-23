@@ -59,16 +59,24 @@ class ComplaintPreprocessor(BaseEstimator, TransformerMixin):
         Private helper to orchestrate data cleaning and filtering steps,
         keeping the public fit and transform methods clean and readable.
         """
+        if not isinstance(df, pd.DataFrame):
+            df = pd.DataFrame(df, columns=[self.feature_column])
+
         df_copy = df.copy()
 
+        # Making the category consolidation conditional,
+        # to differentiate between training & inference
         # 1. Drop rows with missing narratives (based on EDA finding)
-        df_copy.dropna(subset=[self.feature_column], inplace=True)
+        if self.feature_column in df_copy.columns:
+            df_copy.dropna(subset=[self.feature_column], inplace=True)
 
         # 2. Consolidate product categories (based on EDA finding)
-        df_copy = self._consolidate_categories(df_copy)
+        if self.target_column in df_copy.columns:
+            df_copy = self._consolidate_categories(df_copy)
 
         # 3. Apply text cleaning to the narrative
-        df_copy[self.feature_column] = df_copy[self.feature_column].apply(self._clean_text)
+        if self.feature_column in df_copy.columns:
+            df_copy[self.feature_column] = df_copy[self.feature_column].apply(self._clean_text)
 
         return df_copy
 
