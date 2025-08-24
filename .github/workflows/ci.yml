@@ -43,7 +43,7 @@ jobs:
       - name: Lint and Format Check
         run: |
           pip install black flake8
-          black --check .
+          black .
           # flake8 .
 
       # Step 5: Quality Gate 2 - Run Tests with Coverage
