@@ -87,6 +87,7 @@ def run_tuning(data_path: str, model_output_path: str):
         for param, value in best_params.items():
             print(f"  - {param}: {value}")
 
+        mlflow.log_param("git_commit_hash", get_git_commit_hash())
         mlflow.log_params(best_params)
         mlflow.log_metric("best_cv_score", best_score)
 

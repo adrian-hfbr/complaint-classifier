@@ -87,7 +87,7 @@ def run_evaluation(data_path: str, pipeline_path: str):
         plt.savefig("confusion_matrix.png")
         mlflow.log_artifact("confusion_matrix.png")
         print(
-            f"\nConfusion matrix and classification report saved and logged to MLflow."
+            "\nConfusion matrix and classification report saved and logged to MLflow."
         )
 
 
