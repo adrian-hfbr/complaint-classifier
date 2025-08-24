@@ -9,3 +9,15 @@ version = "0.1.0"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "src/train.py",
+    "src/tune.py",
+    "src/evaluate.py",
+    "src/utils.py",
+]
+
+[tool.coverage.report]
+fail_under = 80
