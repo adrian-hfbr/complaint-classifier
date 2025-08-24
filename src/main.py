@@ -1,40 +1,68 @@
 # src/main.py
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pathlib import Path
 import uuid
+from contextlib import asynccontextmanager
 
-# imports encapsulated ML logic
 from .services import ModelService
-
-# imports API contract
 from .schema import ComplaintRequest, ClassificationResponse
 
-# Create the FastAPI app instance -> main object that runs on web server
-app = FastAPI(title="Complaint Classifier API")
+# --- Define the Global Service Variable ---
+# will be populated during the startup event.
+model_service: ModelService | None = None
 
-PIPELINE_PATH = Path("models/best_pipeline.pkl")
-
-# --- Load the Model at Startup ---
-# Create a single, global instance of the ModelService
-# Loaded once into memory and not for every request
-model_service = ModelService(pipeline_path=PIPELINE_PATH)
-
-
-# --- Define the API Endpoint ---
-# Decorator that turns function into endpoint
-@app.post("/classify", response_model=ClassificationResponse)
-def classify_complaint(request: ComplaintRequest):
+# --- Define the Lifespan Event Handler ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """
-    Receives a complaint narrative, checks against configured schema
-    and returns the predicted product category.
+    Manages the application's startup. Loads the model into the global variable.
     """
+    global model_service
+    print("▶️ Application startup: Attempting to load ML pipeline...")
+    
     try:
-        prediction = model_service.predict(request.narrative)
+        pipeline_path = Path("models/best_pipeline.pkl")
+        model_service = ModelService(pipeline_path=pipeline_path)
+        print("ML pipeline loaded successfully.")
+    except Exception as e:
+        model_service = None
+        print(f"ERROR: Model loading failed. API will be unavailable. Error: {e}")
 
-        # Takes prediction result and creates CR object
+    yield
+    print("Application shutdown.")
+
+# Create the App and Register the Lifespan Handler
+app = FastAPI(title="Complaint Classifier API", lifespan=lifespan)
+
+# --- Dependency Getter ---
+def get_model_service() -> ModelService | None:
+    """
+    This dependency getter now simply returns the global model_service instance.
+    """
+    return model_service
+
+# --- API Endpoint ---
+@app.post("/classify", response_model=ClassificationResponse)
+def classify_complaint(
+    request: ComplaintRequest,
+    service: ModelService = Depends(get_model_service)
+):
+    """
+    Receives a complaint narrative and returns the predicted product category.
+    """
+    if not service:
+        raise HTTPException(
+            status_code=503,
+            detail="Model is not loaded or unavailable."
+        )
+        
+    try:
+        prediction = service.predict(request.narrative)
+        
         return ClassificationResponse(
-            predicted_product=prediction, request_id=uuid.uuid4()
+            predicted_product=prediction,
+            request_id=uuid.uuid4()
         )
     except Exception as e:
-        print(f"Prediction failed. {e}")
+        print(f"ERROR: Prediction failed. {e}")
         raise HTTPException(status_code=500, detail="Model inference failed.")
