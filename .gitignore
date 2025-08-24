@@ -8,11 +8,12 @@ __pycache__/
 *.egg-info/
 
 # ML Artifacts - DO NOT COMMIT
-models/
+models/*
+!models/.gitkeep
 mlruns/
 .mlflow/
 
-# Data Files (typically too large for Git)
+# Data Files
 data/
 
 # Generated evaluation artifacts
