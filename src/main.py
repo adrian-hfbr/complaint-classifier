@@ -11,6 +11,7 @@ from .schema import ComplaintRequest, ClassificationResponse
 # will be populated during the startup event.
 model_service: ModelService | None = None
 
+
 # --- Define the Lifespan Event Handler ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -19,7 +20,7 @@ async def lifespan(app: FastAPI):
     """
     global model_service
     print("▶️ Application startup: Attempting to load ML pipeline...")
-    
+
     try:
         pipeline_path = Path("models/best_pipeline.pkl")
         model_service = ModelService(pipeline_path=pipeline_path)
@@ -31,8 +32,10 @@ async def lifespan(app: FastAPI):
     yield
     print("Application shutdown.")
 
+
 # Create the App and Register the Lifespan Handler
 app = FastAPI(title="Complaint Classifier API", lifespan=lifespan)
+
 
 # --- Dependency Getter ---
 def get_model_service() -> ModelService | None:
@@ -41,27 +44,25 @@ def get_model_service() -> ModelService | None:
     """
     return model_service
 
+
 # --- API Endpoint ---
 @app.post("/classify", response_model=ClassificationResponse)
 def classify_complaint(
-    request: ComplaintRequest,
-    service: ModelService = Depends(get_model_service)
+    request: ComplaintRequest, service: ModelService = Depends(get_model_service)
 ):
     """
     Receives a complaint narrative and returns the predicted product category.
     """
     if not service:
         raise HTTPException(
-            status_code=503,
-            detail="Model is not loaded or unavailable."
+            status_code=503, detail="Model is not loaded or unavailable."
         )
-        
+
     try:
         prediction = service.predict(request.narrative)
-        
+
         return ClassificationResponse(
-            predicted_product=prediction,
-            request_id=uuid.uuid4()
+            predicted_product=prediction, request_id=uuid.uuid4()
         )
     except Exception as e:
         print(f"ERROR: Prediction failed. {e}")
