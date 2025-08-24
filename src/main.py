@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from pathlib import Path
 import uuid
 from contextlib import asynccontextmanager
+import csv
 
 from .services import ModelService
 from .schema import ComplaintRequest, ClassificationResponse, CorrectionRequest
@@ -98,20 +99,40 @@ def classify_complaint(
             raise HTTPException(status_code=500, detail="Model inference failed.")
 
 
+# --- Feedback Endpoint ---
 @app.post("/correct")
 def correct_prediction(request: CorrectionRequest):
     """
     Endpoint to receive a corrected label for a previous prediction.
-    In a real application, this would save the data to a database.
+    This now appends the correction to a CSV file for persistence.
     """
-    # Print to demonstrate mechanism
-    print("\n--- Correction Received ---")
-    print(f"  Request ID: {request.request_id}")
-    print(f"   Narrative: {request.narrative[:50]}...")
-    print(f"   Predicted: {request.predicted_product}")
-    print(f"     Correct: {request.correct_product}")
-    print("---------------------------\n")
+    feedback_file = Path("feedback/corrections.csv")
+    
+    # Ensure the directory exists
+    feedback_file.parent.mkdir(exist_ok=True)
+    
+    # Check if the file is new, and if so, write the header row
+    is_new_file = not feedback_file.exists()
+    
+    try:
+        with open(feedback_file, "a", newline="") as f:
+            writer = csv.writer(f)
+            if is_new_file:
+                writer.writerow([
+                    "request_id",
+                    "narrative",
+                    "predicted_product",
+                    "correct_product"
+                ])
+            writer.writerow([
+                request.request_id,
+                request.narrative,
+                request.predicted_product,
+                request.correct_product
+            ])
+        
+        return {"status": "Correction received and saved"}
 
-    # In a PROD-system, this would be saved in a DB
-    # or a message queue for later use in retraining.
-    return {"status": "Correction received"}
+    except Exception as e:
+        print(f"ERROR: Could not write feedback to file. {e}")
+        raise HTTPException(status_code=500, detail="Failed to save correction.")
