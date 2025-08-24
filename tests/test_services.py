@@ -3,7 +3,6 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock
 import joblib
-
 from src.services import ModelService
 
 

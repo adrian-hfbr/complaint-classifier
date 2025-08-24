@@ -3,17 +3,29 @@ from pydantic import BaseModel, Field
 import uuid  # to give each prediction a unique ID
 
 
-# Basemodel has data validation and serialization code
 class ComplaintRequest(BaseModel):
-    # defines the required structure for the body of an incoming POST request
-    # JSON key must be named narrative, of type string & at least 10 characters long
+    """
+    This schema defines the structure for an incoming prediction request.
+    JSON key must be named narrative, of type string & at least 10 characters long
+    """
     narrative: str = Field(
         ..., min_length=10, description="The full text of the customer complaint."
     )
 
-
-# structure for the JSON response
-# Response has key of type str and a key of type uuid
 class ClassificationResponse(BaseModel):
+    """
+    This schema defines the structure for a prediction response.
+    Response has key of type str and a key of type uuid
+    """
     predicted_product: str
     request_id: uuid.UUID
+
+# Schema for the correction request
+class CorrectionRequest(BaseModel):
+    """
+    Represents a user-submitted correction for a prediction.
+    """
+    request_id: uuid.UUID
+    narrative: str
+    predicted_product: str
+    correct_product: str

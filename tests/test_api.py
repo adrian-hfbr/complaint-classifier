@@ -3,6 +3,8 @@ from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
 from src.main import app
 from src.services import ModelService
+from src.schema import CorrectionRequest
+import uuid
 
 
 def test_classify_complaint_success(mocker):
@@ -58,3 +60,43 @@ def test_classify_complaint_server_error(mocker):
     # Assert
     assert response.status_code == 500
     assert response.json() == {"detail": "Model inference failed."}
+
+def test_correct_prediction_success():
+    """
+    Tests the /correct endpoint for a successful submission.
+    """
+    client = TestClient(app)
+    # Arrange: Create a valid correction payload
+    request_data = {
+        "request_id": str(uuid.uuid4()),
+        "narrative": "This was a test about my credit card.",
+        "predicted_product": "Debt collection",
+        "correct_product": "Credit card or prepaid card"
+    }
+    
+    # Act
+    response = client.post("/correct", json=request_data)
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json() == {"status": "Correction received"}
+
+
+def test_correct_prediction_invalid_input():
+    """
+    Tests that the /correct endpoint returns a 422 for invalid input
+    (e.g., missing a required field).
+    """
+    client = TestClient(app)
+    # Arrange: Payload is missing the required 'correct_product' field
+    request_data = {
+        "request_id": str(uuid.uuid4()),
+        "narrative": "This was a test.",
+        "predicted_product": "Debt collection",
+    }
+    
+    # Act
+    response = client.post("/correct", json=request_data)
+
+    # Assert
+    assert response.status_code == 422 # Unprocessable Entity

@@ -1,6 +1,7 @@
 alembic==1.16.4
 annotated-types==0.7.0
 anyio==4.10.0
+black==25.1.0
 blinker==1.9.0
 cachetools==5.5.2
 certifi==2025.8.3
@@ -46,6 +47,7 @@ mdurl==0.1.2
 mlflow==3.3.1
 mlflow-skinny==3.3.1
 mlflow-tracing==3.3.1
+mypy_extensions==1.1.0
 numpy==2.3.2
 opentelemetry-api==1.36.0
 opentelemetry-sdk==1.36.0
@@ -53,8 +55,11 @@ opentelemetry-semantic-conventions==0.57b0
 orjson==3.11.2
 packaging==25.0
 pandas==2.3.2
+pathspec==0.12.1
 pillow==11.3.0
+platformdirs==4.3.8
 pluggy==1.6.0
+prometheus_client==0.22.1
 protobuf==6.32.0
 pyarrow==21.0.0
 pyasn1==0.6.1
