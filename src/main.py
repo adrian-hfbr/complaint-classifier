@@ -14,23 +14,20 @@ import prometheus_client
 # --- 1. Metrics For Monitoring ---
 # To understand the systems behavior
 PREDICTIONS = Counter(
-    "predictions_total",
-    "Total number of predictions made.",
-    ["predicted_product"]
+    "predictions_total", "Total number of predictions made.", ["predicted_product"]
 )
 ERRORS = Counter(
-    "prediction_errors_total",
-    "Total number of errors encountered during prediction."
+    "prediction_errors_total", "Total number of errors encountered during prediction."
 )
 LATENCY = Histogram(
-    "prediction_latency_seconds",
-    "Histogram of prediction latency in seconds."
+    "prediction_latency_seconds", "Histogram of prediction latency in seconds."
 )
 
 
 # --- Define the Global Service Variable ---
 # will be populated during the startup event.
 model_service: ModelService | None = None
+
 
 # --- Define the Lifespan Event Handler ---
 @asynccontextmanager
@@ -64,6 +61,7 @@ def get_model_service() -> ModelService | None:
     """
     return model_service
 
+
 # --- /metrics Endpoint ---
 @app.get("/metrics")
 def get_metrics():
@@ -71,9 +69,9 @@ def get_metrics():
     Endpoint for Prometheus to scrape metrics.
     """
     return Response(
-        media_type="text/plain",
-        content=prometheus_client.generate_latest()
+        media_type="text/plain", content=prometheus_client.generate_latest()
     )
+
 
 # --- API Endpoint ---
 @app.post("/classify", response_model=ClassificationResponse)
@@ -91,14 +89,14 @@ def classify_complaint(
             PREDICTIONS.labels(predicted_product=prediction).inc()
 
             return ClassificationResponse(
-                predicted_product=prediction,
-                request_id=uuid.uuid4()
+                predicted_product=prediction, request_id=uuid.uuid4()
             )
         except Exception as e:
             # Increment the error counter if something goes wrong
             ERRORS.inc()
             print(f"ERROR: Prediction failed. {e}")
             raise HTTPException(status_code=500, detail="Model inference failed.")
+
 
 @app.post("/correct")
 def correct_prediction(request: CorrectionRequest):
@@ -114,6 +112,6 @@ def correct_prediction(request: CorrectionRequest):
     print(f"     Correct: {request.correct_product}")
     print("---------------------------\n")
 
-    # In a PROD-system, this would be saved in a DB 
+    # In a PROD-system, this would be saved in a DB
     # or a message queue for later use in retraining.
     return {"status": "Correction received"}

@@ -61,6 +61,7 @@ def test_classify_complaint_server_error(mocker):
     assert response.status_code == 500
     assert response.json() == {"detail": "Model inference failed."}
 
+
 def test_correct_prediction_success():
     """
     Tests the /correct endpoint for a successful submission.
@@ -71,9 +72,9 @@ def test_correct_prediction_success():
         "request_id": str(uuid.uuid4()),
         "narrative": "This was a test about my credit card.",
         "predicted_product": "Debt collection",
-        "correct_product": "Credit card or prepaid card"
+        "correct_product": "Credit card or prepaid card",
     }
-    
+
     # Act
     response = client.post("/correct", json=request_data)
 
@@ -94,9 +95,9 @@ def test_correct_prediction_invalid_input():
         "narrative": "This was a test.",
         "predicted_product": "Debt collection",
     }
-    
+
     # Act
     response = client.post("/correct", json=request_data)
 
     # Assert
-    assert response.status_code == 422 # Unprocessable Entity
+    assert response.status_code == 422  # Unprocessable Entity
